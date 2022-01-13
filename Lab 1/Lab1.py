@@ -80,9 +80,9 @@ hs = np.linspace(-16, -1, 16)
 for i in range(len(hs)):
     hs[i] = 10**hs[i]
 analytical_fp = fp_lambda(1)
+# these errors are for the absolute errors
 fd_error = [abs(calc_fd(f_lambda, 1, h) - analytical_fp) for h in hs]
 cd_error = [abs(calc_cd(f_lambda, 1, h) - analytical_fp) for h in hs]
-print(fd_error)
 lw = 2
 plt.rcParams.update({'font.size': 18})
 fig = plt.figure(figsize=(8, 6))
@@ -97,6 +97,37 @@ ax.set_xscale("log")
 ax.legend(["f-d error", "c-d error"])
 plt.savefig("error.pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
-# %%
+round_error = 2**-52
+# finding analytical error approximations
+fd_error_approx = [abs((h/2)*fpp_lambda(1)+2*f_lambda(1) * (round_error/h)) for h in hs]
+cd_error_approx = [abs((h**2/24)*fppp_lambda(1)+2 * f_lambda(1)*(round_error/h)) for h in hs]
+ax = fig.add_axes([0, 0, 1, 1.3])
+plt.plot(hs, fd_error_approx, 'b', linewidth=lw, label="f-d error approx.")
+plt.plot(hs, cd_error_approx, 'r', linewidth=lw, label="c-d error approx.")
 
+ax.set_xlabel("h")
+ax.set_ylabel("|abs. error|")
+ax.set_yscale("log")
+ax.set_xscale("log")
+ax.legend(["f-d error approx.", "c-d error approx."])
+plt.savefig("error_approx.pdf", dpi=1200, bbox_inches='tight')
+plt.clf()
 # %%
+# Q1(d)
+fdrich_error = [abs((2*calc_fd(f_lambda, 1, h/2) - calc_fd(f_lambda, 1, h))-analytical_fp)for h in hs]
+cdrich_error = [abs((4*calc_cd(f_lambda, 1, h/2) - calc_cd(f_lambda, 1, h))/3-analytical_fp) for h in hs]
+ax = fig.add_axes([0, 0, 1, 1.3])
+plt.plot(hs, fd_error_approx, 'b', linewidth=lw, label="f-d error approx.")
+plt.plot(hs, cd_error_approx, 'r', linewidth=lw, label="c-d error approx.")
+plt.plot(hs, fdrich_error, 'g', linewidth=lw, label="f-d richardson error")
+plt.plot(hs, cdrich_error, 'm', linewidth=lw, label="c-d richardson error")
+ax.set_xlabel("h")
+ax.set_ylabel("|abs. error|")
+ax.set_yscale("log")
+ax.set_xscale("log")
+ax.legend(["f-d error approx.", "c-d error approx.", "f-d richardson error", "c-d richardson error"])
+plt.savefig("RE_error_approx.pdf", dpi=1200, bbox_inches='tight')
+# %%
+# Q2(a)
+# %%
+# Q2(b)
