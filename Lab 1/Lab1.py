@@ -127,7 +127,103 @@ ax.set_yscale("log")
 ax.set_xscale("log")
 ax.legend(["f-d error approx.", "c-d error approx.", "f-d richardson error", "c-d richardson error"])
 plt.savefig("RE_error_approx.pdf", dpi=1200, bbox_inches='tight')
+plt.clf()
 # %%
 # Q2(a)
+
+
+def calc_cd_1(f, n, x, h):
+    cd = (f(n, x+h/2) - f(n, x-h/2))/h
+    return cd
+
+
+def calc_cd_2(f, n, x, h):
+    cd = (calc_cd_1(f, n, x+h/2, h) - calc_cd_1(f, n, x-h/2, h))/h
+    return cd
+
+
+def calc_cd_3(f, n, x, h):
+    cd = (calc_cd_2(f, n, x+h/2, h) - calc_cd_2(f, n, x-h/2, h))/h
+    return cd
+
+
+def calc_cd_4(f, n, x, h):
+    cd = (calc_cd_3(f, n, x+h/2, h) - calc_cd_3(f, n, x-h/2, h))/h
+    return cd
+
+
+def LP(x, n, h):
+    # solving for the nth derivitive of f
+    def f(n, x): return (x**2-1)**n
+    if n == 1:
+        diff = calc_cd_1(f, n, x, h)
+    elif n == 2:
+        diff = calc_cd_2(f, n, x, h)
+    elif n == 3:
+        diff = calc_cd_3(f, n, x, h)
+    elif n == 4:
+        diff = calc_cd_4(f, n, x, h)
+    Pn = 1/((2**n)*m.factorial(n))*diff
+    return Pn
+
+
+h = 0.01
+# this is confusing do they want them plotted together or seperately?
+xs = np.linspace(-1, 1, 200)
+P1 = [LP(x, 1, h) for x in xs]
+P2 = [LP(x, 2, h) for x in xs]
+P3 = [LP(x, 3, h) for x in xs]
+P4 = [LP(x, 4, h) for x in xs]
+ax = fig.add_axes([-1, -1, 1, 1])
+plt.plot(xs, P1, 'b', linewidth=lw, label="P1")
+plt.plot(xs, P2, 'r', linewidth=lw, label="P2")
+plt.plot(xs, P3, 'g', linewidth=lw, label="P3")
+plt.plot(xs, P4, 'm', linewidth=lw, label="P4")
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.legend(["P1", "P2", "P3", "P4"])
+plt.savefig("legendre.pdf", dpi=1200, bbox_inches='tight')
+plt.clf()
 # %%
 # Q2(b)
+
+
+def cd_n_recursive(f, n, N, x, h):
+    if N == 1:
+        return (f(n, x+h/2) - f(n, x-h/2))/h
+    else:
+        return (cd_n_recursive(f, n, N-1, x+h/2, h) - cd_n_recursive(f, n, N-1, x-h/2, h))/h
+
+
+def LP_improved(x, n, h):
+    # solving for the nth derivitive of f
+    def f(n, x): return (x**2-1)**n
+    diff = cd_n_recursive(f, n, n, x, h)
+    Pn = 1/((2**n)*m.factorial(n))*diff
+    return Pn
+
+
+h = 0.01
+# this is confusing do they want them plotted together or seperately?
+xs = np.linspace(-1, 1, 200)
+P1 = [LP_improved(x, 1, h) for x in xs]
+P2 = [LP_improved(x, 2, h) for x in xs]
+P3 = [LP_improved(x, 3, h) for x in xs]
+P4 = [LP_improved(x, 4, h) for x in xs]
+P5 = [LP_improved(x, 5, h) for x in xs]
+P6 = [LP_improved(x, 6, h) for x in xs]
+P7 = [LP_improved(x, 7, h) for x in xs]
+P8 = [LP_improved(x, 8, h) for x in xs]
+ax = fig.add_axes([-1, -1, 1, 1])
+plt.plot(xs, P1, 'b', linewidth=lw, label="P1")
+plt.plot(xs, P2, 'r', linewidth=lw, label="P2")
+plt.plot(xs, P3, 'g', linewidth=lw, label="P3")
+plt.plot(xs, P4, 'm', linewidth=lw, label="P4")
+plt.plot(xs, P5, 'c', linewidth=lw, label="P5")
+plt.plot(xs, P6, 'y', linewidth=lw, label="P6")
+plt.plot(xs, P7, 'k', linewidth=lw, label="P7")
+plt.plot(xs, P8, 'xkcd:orange', linewidth=lw, label="P8")
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.legend(["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"])
+plt.savefig("legendre_improved.pdf", dpi=1200, bbox_inches='tight')
