@@ -70,8 +70,7 @@ fd_fs = [calc_fd(f_lambda, x, h) for x in xs]
 cd_fs = [calc_cd(f_lambda, x, h) for x in xs]
 plt.plot(xs, fd_fs, 'y', linewidth=lw, label='f-d h=0.5')
 plt.plot(xs, cd_fs, 'm', linewidth=lw, label='c-d h=0.5')
-ax.legend(["analytical", "f-d h=0.15", "c-d h=0.15",
-          "f-d h=0.5", "c-d h=0.5"], loc='upper left')
+ax.legend(["analytical", "f-d h=0.15", "c-d h=0.15", "f-d h=0.5", "c-d h=0.5"], loc='upper left')
 plt.savefig("Q1(b).pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
 # %%
