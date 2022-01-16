@@ -38,7 +38,7 @@ plt.plot(xs, fppps, 'y', linewidth=lw, label='f\'\'\'(x)')
 ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.legend([r"$f(x)$", r"$f'(x)$", r"$f''(x)$", r"$f'''(x)$"], loc='upper left')
-plt.savefig("f(x).pdf", dpi=1200, bbox_inches='tight')
+plt.savefig("Q1(a).pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
 # %%
 # Q1(b)
@@ -72,10 +72,15 @@ plt.plot(xs, fd_fs, 'y', linewidth=lw, label='f-d h=0.5')
 plt.plot(xs, cd_fs, 'm', linewidth=lw, label='c-d h=0.5')
 ax.legend(["analytical", "f-d h=0.15", "c-d h=0.15",
           "f-d h=0.5", "c-d h=0.5"], loc='upper left')
-plt.savefig("fd_comp.pdf", dpi=1200, bbox_inches='tight')
+plt.savefig("Q1(b).pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
 # %%
 # Q1(c)
+
+
+# ask about if I assumed correctly which errors they were talking about
+
+
 hs = np.linspace(-16, -1, 16)
 for i in range(len(hs)):
     hs[i] = 10**hs[i]
@@ -89,13 +94,12 @@ fig = plt.figure(figsize=(8, 6))
 ax = fig.add_axes([0, 0, 1, 1.3])
 plt.plot(hs, fd_error, 'b', linewidth=lw, label="f-d error")
 plt.plot(hs, cd_error, 'r', linewidth=lw, label="c-d error")
-# TO DO: add plots for the error according to the lecture note formulas
 ax.set_xlabel("h")
 ax.set_ylabel("|abs. error|")
 ax.set_yscale("log")
 ax.set_xscale("log")
 ax.legend(["f-d error", "c-d error"])
-plt.savefig("error.pdf", dpi=1200, bbox_inches='tight')
+plt.savefig("Q1(c)-absolute-errors.pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
 round_error = 2**-52
 # finding analytical error approximations
@@ -104,19 +108,20 @@ cd_error_approx = [abs((h**2/24)*fppp_lambda(1)+2 * f_lambda(1)*(round_error/h))
 ax = fig.add_axes([0, 0, 1, 1.3])
 plt.plot(hs, fd_error_approx, 'b', linewidth=lw, label="f-d error approx.")
 plt.plot(hs, cd_error_approx, 'r', linewidth=lw, label="c-d error approx.")
-
 ax.set_xlabel("h")
 ax.set_ylabel("|abs. error|")
 ax.set_yscale("log")
 ax.set_xscale("log")
 ax.legend(["f-d error approx.", "c-d error approx."])
-plt.savefig("error_approx.pdf", dpi=1200, bbox_inches='tight')
+plt.savefig("Q1(c)-error-approximations.pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
 # %%
 # Q1(d)
+# calculating  the richardson errors
 fdrich_error = [abs((2*calc_fd(f_lambda, 1, h/2) - calc_fd(f_lambda, 1, h))-analytical_fp)for h in hs]
 cdrich_error = [abs((4*calc_cd(f_lambda, 1, h/2) - calc_cd(f_lambda, 1, h))/3-analytical_fp) for h in hs]
 ax = fig.add_axes([0, 0, 1, 1.3])
+# plotting the two sets of errors against each other
 plt.plot(hs, fd_error_approx, 'b', linewidth=lw, label="f-d error approx.")
 plt.plot(hs, cd_error_approx, 'r', linewidth=lw, label="c-d error approx.")
 plt.plot(hs, fdrich_error, 'g', linewidth=lw, label="f-d richardson error")
@@ -126,10 +131,11 @@ ax.set_ylabel("|abs. error|")
 ax.set_yscale("log")
 ax.set_xscale("log")
 ax.legend(["f-d error approx.", "c-d error approx.", "f-d richardson error", "c-d richardson error"])
-plt.savefig("RE_error_approx.pdf", dpi=1200, bbox_inches='tight')
+plt.savefig("Q1(d).pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
 # %%
 # Q2(a)
+# definitions for the first 4 derivatives of a function using cd
 
 
 def calc_cd_1(f, n, x, h):
@@ -151,9 +157,12 @@ def calc_cd_4(f, n, x, h):
     cd = (calc_cd_3(f, n, x+h/2, h) - calc_cd_3(f, n, x-h/2, h))/h
     return cd
 
+# legendre polynomail calculation function
+
 
 def LP(x, n, h):
     # solving for the nth derivitive of f
+    # if statements used to call the correct derivative function
     def f(n, x): return (x**2-1)**n
     if n == 1:
         diff = calc_cd_1(f, n, x, h)
@@ -167,6 +176,7 @@ def LP(x, n, h):
     return Pn
 
 
+# calculating and plotting the legendre polynomials
 h = 0.01
 # this is confusing do they want them plotted together or seperately?
 xs = np.linspace(-1, 1, 200)
@@ -182,10 +192,12 @@ plt.plot(xs, P4, 'm', linewidth=lw, label="P4")
 ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.legend(["P1", "P2", "P3", "P4"])
-plt.savefig("legendre.pdf", dpi=1200, bbox_inches='tight')
+plt.savefig("Q2(a).pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
 # %%
 # Q2(b)
+
+# recursive cs function accepts the n as the original n from the expression and N as the order of the derivative to be calculated
 
 
 def cd_n_recursive(f, n, N, x, h):
@@ -193,6 +205,8 @@ def cd_n_recursive(f, n, N, x, h):
         return (f(n, x+h/2) - f(n, x-h/2))/h
     else:
         return (cd_n_recursive(f, n, N-1, x+h/2, h) - cd_n_recursive(f, n, N-1, x-h/2, h))/h
+
+# save function as before but ifs for the function calls is replaced with the better function
 
 
 def LP_improved(x, n, h):
@@ -203,6 +217,7 @@ def LP_improved(x, n, h):
     return Pn
 
 
+# plotting the first 8 LPs
 h = 0.01
 # this is confusing do they want them plotted together or seperately?
 xs = np.linspace(-1, 1, 200)
@@ -226,4 +241,4 @@ plt.plot(xs, P8, 'xkcd:orange', linewidth=lw, label="P8")
 ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.legend(["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"])
-plt.savefig("legendre_improved.pdf", dpi=1200, bbox_inches='tight')
+plt.savefig("Q2(b).pdf", dpi=1200, bbox_inches='tight')
