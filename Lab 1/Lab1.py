@@ -2,6 +2,8 @@ import sympy as sm
 import math as m
 import numpy as np
 import matplotlib.pyplot as plt
+from legendre import legendre
+# the file should save one figure per question, I tried using plt.show() but the figure shown was completely empty
 # %%
 # Q1(a)
 # defining x, f, and its derivatives
@@ -25,21 +27,18 @@ fps = [fp_lambda(x) for x in xs]
 fpps = [fpp_lambda(x) for x in xs]
 fppps = [fppp_lambda(x) for x in xs]
 
-# TO DO: Plots
-# do I want to plot on the same graph or seprate graphs? if on the same graph what should the y label be
-plt.rcParams.update({'font.size': 50})
 lw = 2
 fig = plt.figure(figsize=(8, 6))
+plt.rcParams.update({'font.size': 50})
 ax = fig.add_axes([0, -4, 2*m.pi, 4])
-plt.plot(xs, fs, 'b', linewidth=lw, label='f(x)')
-plt.plot(xs, fps, 'r', linewidth=lw, label='f\'(x)')
-plt.plot(xs, fpps, 'g', linewidth=lw, label='f\'\'(x)')
-plt.plot(xs, fppps, 'y', linewidth=lw, label='f\'\'\'(x)')
+ax.plot(xs, fs, 'b', linewidth=lw, label='f(x)')
+ax.plot(xs, fps, 'r', linewidth=lw, label='f\'(x)')
+ax.plot(xs, fpps, 'g', linewidth=lw, label='f\'\'(x)')
+ax.plot(xs, fppps, 'y', linewidth=lw, label='f\'\'\'(x)')
 ax.set_xlabel("x")
 ax.set_ylabel("y")
-ax.legend([r"$f(x)$", r"$f'(x)$", r"$f''(x)$", r"$f'''(x)$"], loc='upper left')
+ax.legend()
 plt.savefig("Q1(a).pdf", dpi=1200, bbox_inches='tight')
-plt.clf()
 # %%
 # Q1(b)
 
@@ -52,67 +51,49 @@ def calc_cd(f, x, h):
     return (f(x+h/2)-f(x-h/2))/(h)
 
 
-lw = 2
-fig = plt.figure(figsize=(8, 6))
-ax = fig.add_axes([0, -4, 2*m.pi, 4])
 ax.set_xlabel("x")
 ax.set_ylabel("f'(x)")
-plt.plot(xs, fps, 'b', linewidth=lw, label='analytical')
+ax.plot(xs, fps, 'b', linewidth=lw, label='analytical')
 # for h = 0.15
 h = 0.15
 fd_fs = [calc_fd(f_lambda, x, h) for x in xs]
 cd_fs = [calc_cd(f_lambda, x, h) for x in xs]
-plt.plot(xs, fd_fs, 'r', linewidth=lw, label='f-d h=0.15')
-plt.plot(xs, cd_fs, 'g', linewidth=lw, label='c-d h=0.15')
+ax.plot(xs, fd_fs, 'r', linewidth=lw, label='f-d h=0.15')
+ax.plot(xs, cd_fs, 'g', linewidth=lw, label='c-d h=0.15')
 # for h = 0.5
 h = 0.5
 fd_fs = [calc_fd(f_lambda, x, h) for x in xs]
 cd_fs = [calc_cd(f_lambda, x, h) for x in xs]
-plt.plot(xs, fd_fs, 'y', linewidth=lw, label='f-d h=0.5')
-plt.plot(xs, cd_fs, 'm', linewidth=lw, label='c-d h=0.5')
-ax.legend(["analytical", "f-d h=0.15", "c-d h=0.15", "f-d h=0.5", "c-d h=0.5"], loc='upper left')
+ax.plot(xs, fd_fs, 'y', linewidth=lw, label='f-d h=0.5')
+ax.plot(xs, cd_fs, 'm', linewidth=lw, label='c-d h=0.5')
+ax.legend()
 plt.savefig("Q1(b).pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
 # %%
 # Q1(c)
-
-
-# ask about if I assumed correctly which errors they were talking about
-
-
 hs = np.linspace(-16, -1, 16)
 for i in range(len(hs)):
     hs[i] = 10**hs[i]
 analytical_fp = fp_lambda(1)
+round_error = 2**-52
 # these errors are for the absolute errors
 fd_error = [abs(calc_fd(f_lambda, 1, h) - analytical_fp) for h in hs]
 cd_error = [abs(calc_cd(f_lambda, 1, h) - analytical_fp) for h in hs]
-lw = 2
 plt.rcParams.update({'font.size': 18})
-fig = plt.figure(figsize=(8, 6))
 ax = fig.add_axes([0, 0, 1, 1.3])
 plt.plot(hs, fd_error, 'b', linewidth=lw, label="f-d error")
 plt.plot(hs, cd_error, 'r', linewidth=lw, label="c-d error")
-ax.set_xlabel("h")
-ax.set_ylabel("|abs. error|")
-ax.set_yscale("log")
-ax.set_xscale("log")
-ax.legend(["f-d error", "c-d error"])
-plt.savefig("Q1(c)-absolute-errors.pdf", dpi=1200, bbox_inches='tight')
-plt.clf()
-round_error = 2**-52
 # finding analytical error approximations
 fd_error_approx = [abs((h/2)*fpp_lambda(1)+2*f_lambda(1) * (round_error/h)) for h in hs]
 cd_error_approx = [abs((h**2/24)*fppp_lambda(1)+2 * f_lambda(1)*(round_error/h)) for h in hs]
-ax = fig.add_axes([0, 0, 1, 1.3])
-plt.plot(hs, fd_error_approx, 'b', linewidth=lw, label="f-d error approx.")
-plt.plot(hs, cd_error_approx, 'r', linewidth=lw, label="c-d error approx.")
+plt.plot(hs, fd_error_approx, 'g', linewidth=lw, label="f-d error approx.")
+plt.plot(hs, cd_error_approx, 'c', linewidth=lw, label="c-d error approx.")
 ax.set_xlabel("h")
 ax.set_ylabel("|abs. error|")
 ax.set_yscale("log")
 ax.set_xscale("log")
-ax.legend(["f-d error approx.", "c-d error approx."])
-plt.savefig("Q1(c)-error-approximations.pdf", dpi=1200, bbox_inches='tight')
+ax.legend()
+plt.savefig("Q1(c).pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
 # %%
 # Q1(d)
@@ -121,15 +102,15 @@ fdrich_error = [abs((2*calc_fd(f_lambda, 1, h/2) - calc_fd(f_lambda, 1, h))-anal
 cdrich_error = [abs((4*calc_cd(f_lambda, 1, h/2) - calc_cd(f_lambda, 1, h))/3-analytical_fp) for h in hs]
 ax = fig.add_axes([0, 0, 1, 1.3])
 # plotting the two sets of errors against each other
-plt.plot(hs, fd_error_approx, 'b', linewidth=lw, label="f-d error approx.")
-plt.plot(hs, cd_error_approx, 'r', linewidth=lw, label="c-d error approx.")
-plt.plot(hs, fdrich_error, 'g', linewidth=lw, label="f-d richardson error")
-plt.plot(hs, cdrich_error, 'm', linewidth=lw, label="c-d richardson error")
+ax.plot(hs, fd_error_approx, 'b', linewidth=lw, label="f-d error approx.")
+ax.plot(hs, cd_error_approx, 'r', linewidth=lw, label="c-d error approx.")
+ax.plot(hs, fdrich_error, 'g', linewidth=lw, label="f-d richardson error")
+ax.plot(hs, cdrich_error, 'm', linewidth=lw, label="c-d richardson error")
 ax.set_xlabel("h")
 ax.set_ylabel("|abs. error|")
 ax.set_yscale("log")
 ax.set_xscale("log")
-ax.legend(["f-d error approx.", "c-d error approx.", "f-d richardson error", "c-d richardson error"])
+ax.legend()
 plt.savefig("Q1(d).pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
 # %%
@@ -177,20 +158,22 @@ def LP(x, n, h):
 
 # calculating and plotting the legendre polynomials
 h = 0.01
-# this is confusing do they want them plotted together or seperately?
+# LPS is calculated with the function defined in this file, lps is calculated with the provided function
 xs = np.linspace(-1, 1, 200)
-P1 = [LP(x, 1, h) for x in xs]
-P2 = [LP(x, 2, h) for x in xs]
-P3 = [LP(x, 3, h) for x in xs]
-P4 = [LP(x, 4, h) for x in xs]
-ax = fig.add_axes([-1, -1, 1, 1])
-plt.plot(xs, P1, 'b', linewidth=lw, label="P1")
-plt.plot(xs, P2, 'r', linewidth=lw, label="P2")
-plt.plot(xs, P3, 'g', linewidth=lw, label="P3")
-plt.plot(xs, P4, 'm', linewidth=lw, label="P4")
-ax.set_xlabel("x")
-ax.set_ylabel("y")
-ax.legend(["P1", "P2", "P3", "P4"])
+lps = []
+LPS = []
+for i in range(4):
+    lps.append([LP(x, i+1, h) for x in xs])
+    LPS.append([legendre(i+1, x)[0] for x in xs])
+# plotting the legendre polynomials
+plt.rcParams.update({'font.size': 6})
+fig1, ax = plt.subplots(4,  sharex=True, figsize=(6, 8))
+for i in range(4):
+    ax[i].plot(xs, lps[i], '-', c='b',  linewidth=lw, label="Rodrigues")
+    ax[i].plot(xs, LPS[i], '--', c='r',  linewidth=lw, label="Reference")
+    ax[i].set_xlabel("x")
+    ax[i].set_ylabel("P"+str(i+1))
+    ax[i].legend()
 plt.savefig("Q2(a).pdf", dpi=1200, bbox_inches='tight')
 plt.clf()
 # %%
@@ -216,28 +199,20 @@ def LP_improved(x, n, h):
     return Pn
 
 
-# plotting the first 8 LPs
 h = 0.01
-# this is confusing do they want them plotted together or seperately?
-xs = np.linspace(-1, 1, 200)
-P1 = [LP_improved(x, 1, h) for x in xs]
-P2 = [LP_improved(x, 2, h) for x in xs]
-P3 = [LP_improved(x, 3, h) for x in xs]
-P4 = [LP_improved(x, 4, h) for x in xs]
-P5 = [LP_improved(x, 5, h) for x in xs]
-P6 = [LP_improved(x, 6, h) for x in xs]
-P7 = [LP_improved(x, 7, h) for x in xs]
-P8 = [LP_improved(x, 8, h) for x in xs]
-ax = fig.add_axes([-1, -1, 1, 1])
-plt.plot(xs, P1, 'b', linewidth=lw, label="P1")
-plt.plot(xs, P2, 'r', linewidth=lw, label="P2")
-plt.plot(xs, P3, 'g', linewidth=lw, label="P3")
-plt.plot(xs, P4, 'm', linewidth=lw, label="P4")
-plt.plot(xs, P5, 'c', linewidth=lw, label="P5")
-plt.plot(xs, P6, 'y', linewidth=lw, label="P6")
-plt.plot(xs, P7, 'k', linewidth=lw, label="P7")
-plt.plot(xs, P8, 'xkcd:orange', linewidth=lw, label="P8")
-ax.set_xlabel("x")
-ax.set_ylabel("y")
-ax.legend(["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"])
+# empty lists for the legendre polynomials
+lps.clear()
+LPS.clear()
+# filling the arrays with the first 8 LPs for the Rodrigues and the reference
+for i in range(8):
+    lps.append([LP_improved(x, i+1, h) for x in xs])
+    LPS.append([legendre(i+1, x)[0] for x in xs])
+# plotting the legendre polynomials
+fig1, ax = plt.subplots(8,  sharex=True, figsize=(6, 16))
+for i in range(8):
+    ax[i].plot(xs, lps[i], '-', c='b',  linewidth=lw, label="Rodrigues")
+    ax[i].plot(xs, LPS[i], '--', c='r',  linewidth=lw, label="Reference")
+    ax[i].set_xlabel("x")
+    ax[i].set_ylabel("P"+str(i+1))
+    ax[i].legend()
 plt.savefig("Q2(b).pdf", dpi=1200, bbox_inches='tight')
