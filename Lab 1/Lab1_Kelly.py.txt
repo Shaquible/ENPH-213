@@ -7,38 +7,34 @@ from legendre import legendre
 printPlot = False
 # %%
 # Q1(a)
-# defining x, f, and its derivatives
+# defining x, f, and its derivatives as an array of functions for the normal and lambda functions
 x = sm.Symbol('x')
-f = sm.exp(sm.sin(x))
-f_lambda = sm.lambdify(x, f)
-fp = sm.diff(f, x)
-fp_lambda = sm.lambdify(x, fp)
-fpp = sm.diff(fp, x)
-fpp_lambda = sm.lambdify(x, fpp)
-fppp = sm.diff(fpp, x)
-fppp_lambda = sm.lambdify(x, fppp)
+f = [0]*4
+f[0] = sm.exp(sm.sin(x))
+for i in range(1, 4):
+    f[i] = sm.diff(f[i-1], x)
+f_lambda = [sm.lambdify(x, f[i]) for i in range(4)]
 # printing the function and its derivatives
-print("f(x) =", f, "\nf'(x) =", fp, "\nf''(x) =", fpp, "\nf'''(x) =", fppp)
+for i in range(4):
+    print("f", "'"*i, "(x)=", f[i], sep='')
 # declaring a linspace of x values from 0 to 2pi
 xs = np.linspace(0, 2*m.pi, 200)
 print(len(xs), xs[0], xs[len(xs)-1]-2*m.pi)
-# mapping the functions to the x values
-fs = [f_lambda(x) for x in xs]
-fps = [fp_lambda(x) for x in xs]
-fpps = [fpp_lambda(x) for x in xs]
-fppps = [fppp_lambda(x) for x in xs]
-
-lw = 2
+# mapping the functions to the x values as a 2d array for the function and its x values
+fs = np.empty((4, len(xs)))
+for i in range(4):
+    fs[i] = [f_lambda[i](x) for x in xs]
+lw = 1.5
 plt.rcParams.update({'font.size': 10})
 plt.figure(1)
-plt.plot(xs, fs, 'b', linewidth=lw, label='f(x)')
-plt.plot(xs, fps, 'r', linewidth=lw, label='f\'(x)')
-plt.plot(xs, fpps, 'g', linewidth=lw, label='f\'\'(x)')
-plt.plot(xs, fppps, 'y', linewidth=lw, label='f\'\'\'(x)')
+for i in range(4):
+    label = "f"+"'"*i+"(x)"
+    plt.plot(xs, fs[i], label=label, linewidth=lw)
 plt.xlabel("x")
 plt.ylabel("y")
 plt.legend()
 if printPlot:
+
     plt.savefig("Q1(a).pdf", dpi=1200, bbox_inches='tight')
 # %%
 # Q1(b)
@@ -55,17 +51,17 @@ def calc_cd(f, x, h):
 plt.figure(2)
 plt.xlabel("x")
 plt.ylabel("f'(x)")
-plt.plot(xs, fps, 'b', linewidth=lw, label='analytical')
+plt.plot(xs, fs[1], 'b', linewidth=lw, label='analytical')
 # for h = 0.15
 h = 0.15
-fd_fs = [calc_fd(f_lambda, x, h) for x in xs]
-cd_fs = [calc_cd(f_lambda, x, h) for x in xs]
+fd_fs = [calc_fd(f_lambda[0], x, h) for x in xs]
+cd_fs = [calc_cd(f_lambda[0], x, h) for x in xs]
 plt.plot(xs, fd_fs, 'r', linewidth=lw, label='f-d h=0.15')
 plt.plot(xs, cd_fs, 'g', linewidth=lw, label='c-d h=0.15')
 # for h = 0.5
 h = 0.5
-fd_fs = [calc_fd(f_lambda, x, h) for x in xs]
-cd_fs = [calc_cd(f_lambda, x, h) for x in xs]
+fd_fs = [calc_fd(f_lambda[0], x, h) for x in xs]
+cd_fs = [calc_cd(f_lambda[0], x, h) for x in xs]
 plt.plot(xs, fd_fs, 'y', linewidth=lw, label='f-d h=0.5')
 plt.plot(xs, cd_fs, 'm', linewidth=lw, label='c-d h=0.5')
 plt.legend()
@@ -74,19 +70,21 @@ if printPlot:
 # %%
 # Q1(c)
 plt.figure(3)
+# creating a linspace of h values by raising ten to the power of the original array
 hs = np.linspace(-16, -1, 16)
-for i in range(len(hs)):
-    hs[i] = 10**hs[i]
-analytical_fp = fp_lambda(1)
+hs = 10**hs
+analytical_fp = f_lambda[1](1)
+# machine precision gotten from class notes
 round_error = 2**-52
 # these errors are for the absolute errors
-fd_error = [abs(calc_fd(f_lambda, 1, h) - analytical_fp) for h in hs]
-cd_error = [abs(calc_cd(f_lambda, 1, h) - analytical_fp) for h in hs]
+fd_error = [abs(calc_fd(f_lambda[0], 1, h) - analytical_fp) for h in hs]
+cd_error = [abs(calc_cd(f_lambda[0], 1, h) - analytical_fp) for h in hs]
 plt.plot(hs, fd_error, 'b', linewidth=lw, label="f-d error")
 plt.plot(hs, cd_error, 'r', linewidth=lw, label="c-d error")
 # finding analytical error approximations
-fd_error_approx = [abs((h/2)*fpp_lambda(1)+2*f_lambda(1) * (round_error/h)) for h in hs]
-cd_error_approx = [abs((h**2/24)*fppp_lambda(1)+2 * f_lambda(1)*(round_error/h)) for h in hs]
+fd_error_approx = [abs((h/2)*f_lambda[2](1)+2*f_lambda[0](1) * (round_error/h)) for h in hs]
+cd_error_approx = [abs((h**2/24)*f_lambda[3](1)+2 * f_lambda[0](1)*(round_error/h)) for h in hs]
+# plotting
 plt.plot(hs, fd_error_approx, 'g', linewidth=lw, label="f-d error approx.")
 plt.plot(hs, cd_error_approx, 'c', linewidth=lw, label="c-d error approx.")
 plt.xlabel("h")
@@ -100,8 +98,8 @@ if printPlot:
 # Q1(d)
 # calculating  the richardson errors
 plt.figure(4)
-fdrich_error = [abs((2*calc_fd(f_lambda, 1, h/2) - calc_fd(f_lambda, 1, h))-analytical_fp)for h in hs]
-cdrich_error = [abs((4*calc_cd(f_lambda, 1, h/2) - calc_cd(f_lambda, 1, h))/3-analytical_fp) for h in hs]
+fdrich_error = [abs((2*calc_fd(f_lambda[0], 1, h/2) - calc_fd(f_lambda[0], 1, h))-analytical_fp)for h in hs]
+cdrich_error = [abs((4*calc_cd(f_lambda[0], 1, h/2) - calc_cd(f_lambda[0], 1, h))/3-analytical_fp) for h in hs]
 # plotting the two sets of errors against each other
 plt.plot(hs, fd_error_approx, 'b', linewidth=lw, label="f-d error approx.")
 plt.plot(hs, cd_error_approx, 'r', linewidth=lw, label="c-d error approx.")
@@ -187,8 +185,7 @@ if printPlot:
 def cd_n_recursive(f, n, N, x, h):
     if N == 1:
         return (f(n, x+h/2) - f(n, x-h/2))/h
-    else:
-        return (cd_n_recursive(f, n, N-1, x+h/2, h) - cd_n_recursive(f, n, N-1, x-h/2, h))/h
+    return (cd_n_recursive(f, n, N-1, x+h/2, h) - cd_n_recursive(f, n, N-1, x-h/2, h))/h
 
 # save function as before but ifs for the function calls is replaced with the better function
 
@@ -209,20 +206,15 @@ LPS.clear()
 for i in range(8):
     lps.append([LP_improved(x, i+1, h) for x in xs])
     LPS.append([legendre(i+1, x)[0] for x in xs])
-# plotting the legendre polynomials
+# plotting the legendre polynomials (using a nested for loop to plot them in a 4*2 grid)
 fig1, ax = plt.subplots(4, 2,  sharex=True)
-for i in range(4):
-    ax[i][0].plot(xs, lps[i], '-', c='b',  linewidth=lw, label="Rodrigues")
-    ax[i][0].plot(xs, LPS[i], '--', c='r',  linewidth=lw, label="Reference")
-    ax[i][0].set_xlabel("x")
-    ax[i][0].set_ylabel("P"+str(i+1))
-    ax[i][0].legend()
-for i in range(4):
-    ax[i][1].plot(xs, lps[i+4], '-', c='b',  linewidth=lw, label="Rodrigues")
-    ax[i][1].plot(xs, LPS[i+4], '--', c='r',  linewidth=lw, label="Reference")
-    ax[i][1].set_xlabel("x")
-    ax[i][1].set_ylabel("P"+str(i+5))
-    ax[i][1].legend()
+for j in range(2):
+    for i in range(4):
+        ax[i][j].plot(xs, lps[i+j*4], '-', c='b',  linewidth=lw, label="Rodrigues")
+        ax[i][j].plot(xs, LPS[i+j*4], '--', c='r',  linewidth=lw, label="Reference")
+        ax[i][j].set_xlabel("x")
+        ax[i][j].set_ylabel("P"+str(i+1+j*4))
+        ax[i][j].legend()
 if printPlot:
     plt.savefig("Q2(b).pdf", dpi=1200, bbox_inches='tight')
 plt.show()
