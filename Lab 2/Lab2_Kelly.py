@@ -108,8 +108,17 @@ plt.show()
 # Q2(b)
 
 
+def integral_2d(x, y):
+    # taking area of a trapazoid with height delta_y and bases of length x_n and x_n+1
+    area = (y[1:] - y[:-1])*(x[1:] + x[:-1])/2
+    return np.sum(area)
+
+
+print("Area in Hysteresis Curve =", integral_2d(Vx, Vy))
 # %%
 # Q3(a)
+
+
 def simpsons2D(f, a, b, c, d, n, m):
     if n % 2 == 2:
         return "ERROR"
