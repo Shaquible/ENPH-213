@@ -27,7 +27,7 @@ def trapezoid(f, a, b, n):  # trapezoid method with n as the number of elements 
 
 def simpsons(f, a, b, n):  # simpson's rule of 1/3 with n as the number of elements including the endpoint but not the startpoint
     if n % 2 == 0:
-        return "ERROR, n must be odd"
+        return 0
     h = (b - a) / (n-1)
     xs = np.linspace(a, b, n)
     # generating the array for weights [1,4,2,......2,4,1]
@@ -42,7 +42,8 @@ integrate = [rectangle, trapezoid, simpsons]
 
 def erf(z, i, n):  # z is the z value, i is the integration function to be used (seen in the above array), and n is the number of steps
     # integrating a vectorized function of e^(-z^2) to make it compatible with the integration functions
-    return 2/m.sqrt(m.pi)*integrate[i](np.vectorize(lambda x: m.exp(-x**2)), 0, z, n)
+    int = integrate[i](np.vectorize(lambda x: m.exp(-x**2)), 0, z, n)
+    return (2/m.sqrt(m.pi))*int
 
 
 # accepted value for comparison
