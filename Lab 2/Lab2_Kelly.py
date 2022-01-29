@@ -54,6 +54,7 @@ for j in range(2):
     for i in range(3):
         errors[j][i] = abs((erf(1, i, 100+j)-reference)/reference*100)
 
+# error decreases as n increases
 print("Rectangle error at n = 100: ", errors[0][0], '%')
 print("Trapezoid error at n = 100: ", errors[0][1], '%')
 print("No simpson at 100 since it requires an odd n")
@@ -70,10 +71,11 @@ def adaptive_step(f, z):  # takes function and the value to evaluate at for comp
     In = erf(z, 2, 3)
     i = 0
     n = 5
+    ref = m.erf(z)
     # calculating In' and then checking if the error is satisfactory at < 10^-13. if not then n is increased to 2n-1
     while True:
         Inp = erf(z, 2, n)
-        if (abs(Inp-In) > 10**-13):
+        if ((abs(Inp-In) / ref) > 10**-13):
             n = n*2 - 1
             In = Inp
             i += 1  # incrementing to the number of times that n has been increased from the initial
@@ -87,7 +89,7 @@ def adaptive_step(f, z):  # takes function and the value to evaluate at for comp
     n = 5
     while True:
         Inp = erf(z, 1, n)
-        if (abs(Inp-In) > 10**-13):
+        if ((abs(Inp-In)/ref) > 10**-13):
             n = n*2 - 1
             In = Inp
             i += 1
