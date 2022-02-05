@@ -43,14 +43,14 @@ def infinityNorm(A):
 
 # calling all of the created functions and printing the results
 arr1 = nxnfill(4)
-print(arr1)
-print(lowerTri(arr1))
-print(upperTri(arr1))
+print("A\n", arr1)
+print("Lower Triangle(A)\n", lowerTri(arr1))
+print("Upper Triangle(A)\n", upperTri(arr1))
 print("My function Euclidian norm", euclideanNorm(arr1))
 print("NP Euclidian norm", np.linalg.norm(arr1))
 print("My function infinity norm", infinityNorm(arr1))
 print("NP infinity norm", np.linalg.norm(arr1, np.inf))
-
+print("\n")
 # %%
 # Q1(b)
 
@@ -85,6 +85,7 @@ def q1b(n):
 
 
 q1b(4)
+print("\n")
 q1b(16)
 # %%
 # Q2(a)
@@ -122,18 +123,19 @@ def solveCompare(f, g, A, bs):  # printing first 3 elements of the two solutions
     print("Accepted Solution first 3 elements", x1[0:3])
 
 
-timer_start = default_timer()
-U = nxnfill(10)
+print("\n")
+U = nxnfill(5000)
 bs = U[0, :]
+timer_start = default_timer()
 x1 = backsub1(U, bs)
 timer_end = default_timer()
 time1 = timer_end - timer_start
-print('time1 :', time1)
+print('Backsub1 time:', time1)
 timer_start = default_timer()
 x2 = backsub2(U, bs)
 timer_end = default_timer()
 time2 = timer_end - timer_start
-print('time2 :', time2)
+print('Backsub2 time:', time2)
 solveCompare(backsub1, backsub2, U, bs)
 
 
@@ -160,7 +162,7 @@ def gausselim(A, bs):
 A = np.array([[2, 1, 1], [1, 1, -2], [1, 2, 1]])
 B = np.array([8, -2, 2])
 
-print(gausselim(A, B))
+print("2(b) solution", gausselim(A, B))
 
 # %%
 # Q2(c)
@@ -188,7 +190,7 @@ def gausselimPartial(A, bs):
 
 A = np.array([[2, 1, 1], [2, 1, -4], [1, 2, 1]])
 B = np.array([8, -2, 2])
-print(gausselimPartial(A, B))
+print("2(c) solution", gausselimPartial(A, B))
 
 # %%
 # Q2(d)
@@ -210,4 +212,4 @@ def inverseMatrix(A):
 
 
 A = np.array([[1, 2, 3], [0, 1, 4], [5, 6, 0]])
-print(inverseMatrix(A))
+print("Inverse Matrix\n", inverseMatrix(A))
