@@ -120,10 +120,10 @@ def cubicSpline(xs, ys, xInterp):
     diagMid = np.diagflat(np.ones_like(A[:, 0]))
     diagUP = np.diagflat(np.ones_like(A[1:, 0]), k=1)
     diagDOWN = np.diagflat(np.ones_like(A[1:, 0]), k=-1)
-
     A += 2*diagMid*(xs[2:, None]-xs[:-2, None])
-    A += diagUP*(xs[1:-1, None]-xs[:-2, None])
-    A += diagDOWN*(xs[2:, None]-xs[1:-1, None])
+    A += diagUP*(xs[2:, None]-xs[1:-1, None])
+    A += diagDOWN*(xs[1:-1, None]-xs[:-2, None])
+    print(xs[-2]-xs[-3])
     cs = np.linalg.solve(A, bs)
     cs = np.insert(cs, 0, 0)
     cs = np.insert(cs, n-1, 0)
