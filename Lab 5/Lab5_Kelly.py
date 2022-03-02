@@ -58,7 +58,7 @@ fig, axs = plt.subplots(1, 2, figsize=(12, 4))
 xEqual, yEqual = generateData(15, runge, spacing="equal")
 axs[1].plot(xEqual, yEqual, "ko", label="Points", markersize=ms)
 p = polynomailInterpolation(xEqual, yEqual)
-xs = np.linspace(-1, 1, 1000)
+xs = np.linspace(-1, 1, 100)
 ys = p(xs)
 axs[1].plot(xs, ys, "r-", label="Monomial", linewidth=lw)
 ys = Lagrange(xEqual, yEqual, xs)
@@ -108,7 +108,8 @@ axs[1].set_xlabel("x")
 axs[1].set_ylabel("y")
 axs[1].legend()
 plt.show()
-print("The Lagrange interpolation is better for n=101 around the boundaries but the Monomial looks the same.")
+print("On my desktop the Monomial interpolation is better for n=101 around the boundaries but the Lagrange looks the same.")
+print("I ran this on my laptop and the monomial broke down for n=91.")
 
 # %% Q2
 
@@ -123,7 +124,6 @@ def cubicSpline(xs, ys, xInterp):
     A += 2*diagMid*(xs[2:, None]-xs[:-2, None])
     A += diagUP*(xs[2:, None]-xs[1:-1, None])
     A += diagDOWN*(xs[1:-1, None]-xs[:-2, None])
-    print(xs[-2]-xs[-3])
     cs = np.linalg.solve(A, bs)
     cs = np.insert(cs, 0, 0)
     cs = np.insert(cs, n-1, 0)
@@ -143,11 +143,11 @@ xCheb, yCheb = generateData(7, runge, spacing="cheb")
 xs = np.linspace(-1, 1, 100)
 ys = cubicSpline(xCheb, yCheb, xs)
 axs[0].plot(xs, ys, "r-", label="n=7", linewidth=lw)
-axs[0].plot(xCheb, yCheb, "ko", label="Points", markersize=ms)
+axs[0].plot(xCheb, yCheb, "bo", label="n=7 Points", markersize=ms+1)
 xCheb, yCheb = generateData(15, runge, spacing="cheb")
 ys = cubicSpline(xCheb, yCheb, xs)
 axs[0].plot(xs, ys, "b--", label="n=15", linewidth=lw)
-axs[0].plot(xCheb, yCheb, "ko", markersize=ms)
+axs[0].plot(xCheb, yCheb, "ko", label="n=15 Points", markersize=ms)
 axs[0].set_title("Chebyshev")
 axs[0].set_xlabel("x")
 axs[0].set_ylabel("y")
@@ -155,11 +155,11 @@ axs[0].legend()
 xEqual, yEqual = generateData(7, runge, spacing="equal")
 ys = cubicSpline(xEqual, yEqual, xs)
 axs[1].plot(xs, ys, "r-", label="n=7", linewidth=lw)
-axs[1].plot(xEqual, yEqual, "ko", label="Points", markersize=ms)
+axs[1].plot(xEqual, yEqual, "bo", label="n=7 Points", markersize=ms+1)
 xEqual, yEqual = generateData(15, runge, spacing="equal")
 ys = cubicSpline(xEqual, yEqual, xs)
 axs[1].plot(xs, ys, "b--", label="n=15", linewidth=lw)
-axs[1].plot(xEqual, yEqual, "ko", markersize=ms)
+axs[1].plot(xEqual, yEqual, "ko", label="n=15 Points", markersize=ms)
 axs[1].set_title("Equal Spacing")
 axs[1].set_xlabel("x")
 axs[1].set_ylabel("y")
@@ -169,33 +169,44 @@ plt.show()
 # %% Q3
 
 
-def trigonometricInterpolation(xs, ys, xInterp):
-    n = len(xs)
+def trigonometricInterpolation(f, n, nInterp):
     m = (n-1)/2
     ks = np.linspace(0, m, int(m)+1, endpoint=True)
     aks = np.zeros_like(ks)
     bks = np.zeros_like(ks)
+    xj = 2*np.pi/n*np.linspace(0, n, num=n, endpoint=False)
+    yj = f(xj)
+    xInterp = 2*np.pi/nInterp*np.linspace(0, nInterp, nInterp)
     for i in range(0, int(m)+1):
-        aks[i] = 1/m*np.sum(np.cos(ks[i]*xs)*ys)
-        bks[i] = 1/m*np.sum(np.sin(ks[i]*xs)*ys)
+        aks[i] = 1/m*np.sum(np.cos(ks[i]*xj)*yj)
+        bks[i] = 1/m*np.sum(np.sin(ks[i]*xj)*yj)
     a0 = aks[0]
     aks = aks[1:]
     bks = bks[1:]
     ks = ks[1:]
 
-    y = np.zeros_like(xInterp)
+    yInterp = np.zeros_like(xInterp)
     for i in range(len(xInterp)):
-        y[i] = 1/2*a0+np.sum(aks*np.cos(ks*xInterp[i])+bks*np.sin(ks*xInterp[i]))
-    return y
+        yInterp[i] = 1/2*a0+np.sum(aks*np.cos(ks*xInterp[i])+bks*np.sin(ks*xInterp[i]))
+    return xInterp, yInterp, xj, yj
 
 
-def f(x): return np.exp(np.sin(2*x))
+def f(x): return np.e**(np.sin(2*x))
 
 
-xEqual11 = np.linspace(0, 2*np.pi, 11)
-yEqual11 = f(xEqual11)
-xs = np.linspace(0, 2*np.pi, 500)
-ys = trigonometricInterpolation(xEqual11, yEqual11, xs)
-plt.plot(xs, ys)
-plt.plot(xEqual11, yEqual11, "ko", markersize=ms)
+fig, axs = plt.subplots(1, 2, figsize=(12, 4))
+xInterp, yInterp, xs, ys = trigonometricInterpolation(f, 11, 500)
+axs[0].plot(xInterp, yInterp, "r-", label="Trig Interpolation", linewidth=lw)
+axs[0].plot(xs, ys, "ko", markersize=ms, label="Points")
+axs[0].set_title("n=11")
+axs[0].set_xlabel("x")
+axs[0].set_ylabel("y")
+axs[0].legend()
+xInterp, yInterp, xs, ys = trigonometricInterpolation(f, 51, 500)
+axs[1].plot(xInterp, yInterp, "r-", label="Trig Interpolation", linewidth=lw)
+axs[1].plot(xs, ys, "ko", markersize=ms, label="Points")
+axs[1].set_title("n=51")
+axs[1].set_xlabel("x")
+axs[1].set_ylabel("y")
+axs[1].legend()
 plt.show()
