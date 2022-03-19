@@ -216,14 +216,22 @@ fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
 
-def update(num, data, line):
-    line.set_data(data[:2, :num])
-    line.set_3d_properties(data[2, :num])
+def update(num, data, lines):
+    for lnum, line in enumerate(lines):
+        line.set_data(data[lnum, :2, :num])
+        line.set_3d_properties(data[lnum, 2, :num])
+    return lines
 
+
+data = np.array([y, y2]).T
+
+lines = []
+for i in range(2):
+    lobj = ax.plot(data[i, 0, 0:1], data[i, 1, 0:1], data[i, 2, 0:1])
+    lines.append(lobj)
 
 N = len(t)
-data = np.array(y).T
-line, = ax.plot(data[0, 0:1], data[1, 0:1], data[2, 0:1])
+
 
 ax.set_xlim3d([-20, 20])
 ax.set_ylim3d([-20, 20])
@@ -232,5 +240,5 @@ ax.set_xlabel('$x$')
 ax.set_ylabel('$y$')
 ax.set_zlabel('$z$')
 
-ani = animation.FuncAnimation(fig, update, N, fargs=(data, line), interval=10, blit=False)
+ani = animation.FuncAnimation(fig, update, N, fargs=(data, lines), interval=10, blit=False)
 plt.show()
