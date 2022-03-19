@@ -212,33 +212,44 @@ plt.legend(loc='best')
 plt.show()
 
 # %% Q3(b)
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
 
 
-def update(num, data, lines):
-    for lnum, line in enumerate(lines):
-        line.set_data(data[lnum, :2, :num])
-        line.set_3d_properties(data[lnum, 2, :num])
-    return lines
+x11 = np.array(y[:, 0])
+y11 = np.array(y[:, 1])
+z11 = np.array(y[:, 2])
+x22 = np.array(y2[:, 0])
+y22 = np.array(y2[:, 1])
+z22 = np.array(y2[:, 2])
+
+time_vals = t
+plt.rcParams.update({'font.size': 18})
+fig = plt.figure(dpi=180)  # nice and sharp!
+ax = fig.add_axes([0.1, 0.1, 0.85, 0.85], projection='3d')
+line, = ax.plot3D(x11, y11, z11, 'r-', linewidth=0.8)
+line2, = ax.plot3D(x22, y22, z22, 'b-', linewidth=0.8)
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('z')
 
 
-data = np.array([y, y2]).T
+def init():
+    line.set_data(np.array([]), np.array([]))
+    line.set_3d_properties([])
+    line.axes.axis([-25, 25, -25, 25])
+    line2.set_data(np.array([]), np.array([]))
+    line2.set_3d_properties([])
+    line2.axes.axis([-25, 25, -25, 25])
+    return line, line2
 
-lines = []
-for i in range(2):
-    lobj = ax.plot(data[i, 0, 0:1], data[i, 1, 0:1], data[i, 2, 0:1])
-    lines.append(lobj)
 
-N = len(t)
+def update(num):
+    line.set_data(x11[:num], y11[:num])
+    line.set_3d_properties(z11[:num])
+    line2.set_data(x22[:num], y22[:num])
+    line2.set_3d_properties(z22[:num])
+    fig.canvas.draw()
+    return line, line2
 
 
-ax.set_xlim3d([-20, 20])
-ax.set_ylim3d([-20, 20])
-ax.set_zlim3d([0, 50])
-ax.set_xlabel('$x$')
-ax.set_ylabel('$y$')
-ax.set_zlabel('$z$')
-
-ani = animation.FuncAnimation(fig, update, N, fargs=(data, lines), interval=10, blit=False)
+ani = animation.FuncAnimation(fig, update, init_func=init, interval=1, frames=len(time_vals), blit=True, repeat=True)
 plt.show()
