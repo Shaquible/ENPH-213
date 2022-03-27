@@ -117,13 +117,10 @@ def poissonFourier(f, a, b, n):
     tmp = np.cos(2*np.pi*kx/n)+np.cos(2*np.pi*ky/n)-2
     # initializing the solution matrix
     phiFT = np.zeros((n, n), dtype=complex)
-    # computing phi tilde for the inner points (this is split up into 5 lines to avoid a divide by zero error)
-    phiFT[1:-1, 1:-1] = 0.5*h**2*fklFT[1:-1, 1:-1]/tmp[1:-1, 1:-1]
-    # computing phi tilde for the non corner edge points
-    phiFT[1:-1, 0] = 0.5*h**2*fklFT[1:-1, 0]/tmp[1:-1, 0]
-    phiFT[1:-1, -1] = 0.5*h**2*fklFT[1:-1, -1]/tmp[1:-1, -1]
-    phiFT[0, 1:-1] = 0.5*h**2*fklFT[0, 1:-1]/tmp[0, 1:-1]
-    phiFT[-1, 1:-1] = 0.5*h**2*fklFT[-1, 1:-1]/tmp[-1, 1:-1]
+    # computing phi tilde for all but the first row to avoid division by zero
+    phiFT[1:, :] = 0.5*h**2*fklFT[1:, :]/tmp[1:, :]
+    # computing phi for the first row less the point 0,0
+    phiFT[0, 1:] = 0.5*h**2*fklFT[0, 1:]/tmp[0, 1:]
     # inverting the FT
     return np.fft.ifft2(phiFT)
 
