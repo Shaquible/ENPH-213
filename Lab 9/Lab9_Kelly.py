@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 n = 1000
 # generating n (x,y) points
 pi = np.zeros(4, dtype=np.float64)
-fig, ax = plt.subplots(1, 4, figsize=(16, 4))
+fig, ax = plt.subplots(1, 4, figsize=(18, 4))
 circ = plt.Circle((0, 0), 0.5, color='g', fill=True)
 for i in range(4):
     xy = np.random.rand(n, 2)-0.5
@@ -144,11 +144,13 @@ M = np.zeros_like(kTs)
 E = -np.tanh(1/kTs)
 ax[0].plot(kTs, AvgEnergies/n, 'bo', label='$<E>$', markersize=2)
 ax[0].plot(kTs, E, 'r-', label='$<E> an$')
+ax[0].set_title("Average Energy vs Temperature for N=50 spin chain")
 ax[1].plot(kTs, AvgMag/n, 'bo', label='$<M>$', markersize=2)
 ax[1].plot(kTs, M, 'r--', label='$<M> an$')
 ax[1].set_xlabel('$kT/\epsilon$')
 ax[0].set_ylabel('$<E>/N\epsilon$')
 ax[1].set_ylabel('$<M>/N$')
+ax[1].set_title("Average Magnetization vs Temperature for N=50 spin chain")
 plt.show()
 
 # %%
